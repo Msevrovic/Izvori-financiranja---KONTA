@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Izvori financiranja i konta prihoda — Dashboard</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f4f6fa;
+    --surface: #ffffff;
+    --border: #e2e6ee;
+    --border-strong: #c8cfdb;
+    --text: #1a2332;
+    --text-muted: #5a6478;
+    --text-subtle: #8a93a6;
+    --accent: #2d4a8a;
+    --accent-soft: #eaf0fa;
+    --shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 4px 12px rgba(15, 23, 42, 0.04);
+    --radius: 8px;
+
+    /* Group colors */
+    --g1: #1e40af; --g1-soft: #dbeafe;
+    --g3: #047857; --g3-soft: #d1fae5;
+    --g4: #0e7490; --g4-soft: #cffafe;
+    --g5: #6d28d9; --g5-soft: #ede9fe;
+    --g6: #c2410c; --g6-soft: #ffedd5;
+    --g7: #be123c; --g7-soft: #ffe4e6;
+    --g8: #475569; --g8-soft: #e2e8f0;
+    --gx: #6b7280; --gx-soft: #e5e7eb;
+  }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Segoe UI Variable", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px 24px 48px;
+  }
+
+  /* Header */
+  header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+  }
+  header h1 {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--text);
+  }
+  header p.subtitle {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-top: 4px;
+  }
+  .stats {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 8px 14px;
+    text-align: center;
+    min-width: 90px;
+  }
+  .stat .num {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--accent);
+    line-height: 1.1;
+  }
+  .stat .label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-top: 2px;
+  }
+
+  /* Toolbar */
+  .toolbar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow);
+  }
+  .search-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .search-box {
+    flex: 1 1 320px;
+    position: relative;
+  }
+  .search-box input {
+    width: 100%;
+    padding: 10px 12px 10px 38px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-family: inherit;
+    background: #fff;
+    color: var(--text);
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .search-box input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(45, 74, 138, 0.12);
+  }
+  .search-box svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    color: var(--text-subtle);
+    pointer-events: none;
+  }
+  .clear-btn {
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    padding: 8px 14px;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--text-muted);
+    transition: all 0.15s;
+  }
+  .clear-btn:hover {
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  /* Group chips */
+  .chips-label {
+    font-size: 11px;
+    color: var(--text-subtle);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: 999px;
+    font-size: 12.5px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+    color: var(--text);
+    user-select: none;
+  }
+  .chip:hover { background: #f9fafc; border-color: var(--border-strong); }
+  .chip.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    font-weight: 500;
+  }
+  .chip .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--gx);
+  }
+  .chip[data-g="1"] .dot { background: var(--g1); }
+  .chip[data-g="3"] .dot { background: var(--g3); }
+  .chip[data-g="4"] .dot { background: var(--g4); }
+  .chip[data-g="5"] .dot { background: var(--g5); }
+  .chip[data-g="6"] .dot { background: var(--g6); }
+  .chip[data-g="7"] .dot { background: var(--g7); }
+  .chip[data-g="8"] .dot { background: var(--g8); }
+  .chip .count {
+    font-size: 11px;
+    color: var(--text-muted);
+    background: rgba(0,0,0,0.05);
+    padding: 1px 6px;
+    border-radius: 8px;
+    margin-left: 2px;
+  }
+  .chip.active .count {
+    background: rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.95);
+  }
+
+  /* Results count */
+  .results-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    font-size: 12.5px;
+    color: var(--text-muted);
+    padding: 0 4px;
+  }
+  .results-info b { color: var(--text); font-weight: 600; }
+
+  /* Table */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  thead th {
+    background: #f8fafc;
+    text-align: left;
+    padding: 10px 14px;
+    font-weight: 600;
+    color: var(--text-muted);
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.12s;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #fafbfd; }
+  tbody td {
+    padding: 11px 14px;
+    vertical-align: top;
+  }
+  td.col-src { width: 110px; }
+  td.col-konto { width: 130px; }
+  td.col-srcname { width: 22%; }
+  td.col-purpose { }
+  td.col-kontoname { width: 22%; }
+
+  /* Group color border */
+  tbody tr td:first-child {
+    border-left: 4px solid transparent;
+  }
+  tbody tr[data-g="1"] td:first-child { border-left-color: var(--g1); }
+  tbody tr[data-g="3"] td:first-child { border-left-color: var(--g3); }
+  tbody tr[data-g="4"] td:first-child { border-left-color: var(--g4); }
+  tbody tr[data-g="5"] td:first-child { border-left-color: var(--g5); }
+  tbody tr[data-g="6"] td:first-child { border-left-color: var(--g6); }
+  tbody tr[data-g="7"] td:first-child { border-left-color: var(--g7); }
+  tbody tr[data-g="8"] td:first-child { border-left-color: var(--g8); }
+  tbody tr[data-g="X"] td:first-child { border-left-color: var(--gx); }
+
+  .code {
+    font-family: "SF Mono", "Cascadia Mono", Consolas, "Roboto Mono", "Courier New", monospace;
+    font-weight: 600;
+    font-size: 12.5px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: #f1f5f9;
+    color: var(--text);
+    display: inline-block;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+    user-select: all;
+  }
+  .code:hover {
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  .code.copied {
+    background: #d1fae5 !important;
+    color: #047857 !important;
+  }
+  tr[data-g="1"] .code { background: var(--g1-soft); color: var(--g1); }
+  tr[data-g="3"] .code { background: var(--g3-soft); color: var(--g3); }
+  tr[data-g="4"] .code { background: var(--g4-soft); color: var(--g4); }
+  tr[data-g="5"] .code { background: var(--g5-soft); color: var(--g5); }
+  tr[data-g="6"] .code { background: var(--g6-soft); color: var(--g6); }
+  tr[data-g="7"] .code { background: var(--g7-soft); color: var(--g7); }
+  tr[data-g="8"] .code { background: var(--g8-soft); color: var(--g8); }
+  tr[data-g="X"] .code { background: var(--gx-soft); color: var(--gx); }
+
+  .src-name {
+    font-weight: 500;
+    color: var(--text);
+  }
+  .konto-name {
+    color: var(--text-muted);
+    font-size: 12.5px;
+  }
+  .purpose {
+    color: var(--text);
+    font-size: 12.5px;
+    line-height: 1.55;
+  }
+
+  mark {
+    background: #fef08a;
+    color: var(--text);
+    padding: 0 2px;
+    border-radius: 2px;
+  }
+
+  .empty {
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--text-muted);
+  }
+  .empty svg {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 12px;
+    color: var(--text-subtle);
+    display: block;
+  }
+
+  /* Notes accordion */
+  .notes {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-top: 16px;
+    box-shadow: var(--shadow);
+  }
+  .notes-toggle {
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 14px 16px;
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .notes-toggle:hover { background: #f8fafc; }
+  .notes-toggle .arrow {
+    transition: transform 0.2s;
+    color: var(--text-muted);
+  }
+  .notes.open .notes-toggle .arrow {
+    transform: rotate(90deg);
+  }
+  .notes-content {
+    display: none;
+    padding: 4px 16px 16px;
+    border-top: 1px solid var(--border);
+  }
+  .notes.open .notes-content { display: block; }
+  .notes-content ul {
+    list-style: none;
+    margin-top: 8px;
+  }
+  .notes-content li {
+    padding: 8px 0 8px 24px;
+    position: relative;
+    color: var(--text-muted);
+    font-size: 13px;
+    line-height: 1.55;
+    border-bottom: 1px dashed var(--border);
+  }
+  .notes-content li:last-child { border-bottom: none; }
+  .notes-content li::before {
+    content: "";
+    position: absolute;
+    left: 8px;
+    top: 16px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .notes-content li b { color: var(--text); font-weight: 600; }
+  .notes-content .legend-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    font-size: 12.5px;
+  }
+  .notes-content .legend-row .swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+  .legend-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 4px 16px;
+    margin: 8px 0 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px dashed var(--border);
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #1a2332;
+    color: white;
+    padding: 10px 18px;
+    border-radius: 6px;
+    font-size: 13px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s, transform 0.2s;
+    z-index: 100;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    margin-top: 24px;
+    padding: 14px;
+    font-size: 11.5px;
+    color: var(--text-subtle);
+  }
+
+  /* Mobile responsive */
+  @media (max-width: 880px) {
+    .wrap { padding: 14px; }
+    header h1 { font-size: 18px; }
+    table { font-size: 12px; }
+    thead th { padding: 8px 10px; }
+    tbody td { padding: 9px 10px; }
+    td.col-src, td.col-konto { width: auto; }
+    td.col-srcname, td.col-kontoname { width: auto; }
+    .stat { min-width: 75px; padding: 6px 10px; }
+    .stat .num { font-size: 17px; }
+  }
+  @media (max-width: 640px) {
+    /* Card layout on small screens */
+    thead { display: none; }
+    tbody, tr, td { display: block; width: 100% !important; }
+    tbody tr {
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+    tbody tr td:first-child { border-left: none; padding-left: 0; }
+    tbody tr {
+      border-left: 4px solid transparent;
+    }
+    tbody tr[data-g="1"] { border-left-color: var(--g1); }
+    tbody tr[data-g="3"] { border-left-color: var(--g3); }
+    tbody tr[data-g="4"] { border-left-color: var(--g4); }
+    tbody tr[data-g="5"] { border-left-color: var(--g5); }
+    tbody tr[data-g="6"] { border-left-color: var(--g6); }
+    tbody tr[data-g="7"] { border-left-color: var(--g7); }
+    tbody tr[data-g="8"] { border-left-color: var(--g8); }
+    tbody tr[data-g="X"] { border-left-color: var(--gx); }
+    tbody td { padding: 4px 0; border: none; }
+    tbody td::before {
+      content: attr(data-label);
+      display: block;
+      font-size: 10.5px;
+      text-transform: uppercase;
+      color: var(--text-subtle);
+      letter-spacing: 0.04em;
+      margin-bottom: 2px;
+      font-weight: 600;
+    }
+    .table-wrap { background: transparent; border: none; box-shadow: none; padding: 0; }
+  }
+
+  @media print {
+    header .stats, .toolbar, .notes-toggle .arrow, .toast { display: none !important; }
+    .table-wrap { box-shadow: none; border: 1px solid #ccc; }
+    body { background: white; }
+    .wrap { max-width: none; padding: 0; }
+    tbody tr { page-break-inside: avoid; }
+    .notes.open .notes-content { display: block; }
+    .notes-toggle { pointer-events: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div>
+    <h1>Izvori financiranja i konta prihoda</h1>
+    <p class="subtitle">Referentni preglednik za računovodstvo · primjenjivo od 01.01.2026.</p>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="num" id="stat-rows">—</div><div class="label">Stavki</div></div>
+    <div class="stat"><div class="num" id="stat-sources">—</div><div class="label">Izvora</div></div>
+    <div class="stat"><div class="num" id="stat-kontos">—</div><div class="label">Konta</div></div>
+  </div>
+</header>
+
+<div class="toolbar">
+  <div class="search-row">
+    <div class="search-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input id="search" type="text" placeholder="Pretraži po šifri izvora, kontu, nazivu ili namjeni..." autocomplete="off">
+    </div>
+    <button class="clear-btn" id="clear-btn">Očisti</button>
+  </div>
+  <div class="chips-label">Filtriraj po skupini izvora</div>
+  <div class="chips" id="chips"></div>
+</div>
+
+<div class="results-info">
+  <span><b id="count-shown">0</b> od <b id="count-total">0</b> stavki</span>
+  <span class="hint" style="font-size:11.5px;color:var(--text-subtle)">Klik na šifru ili konto za kopiranje</span>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Šifra</th>
+        <th>Naziv izvora</th>
+        <th>Aktivnost / namjena</th>
+        <th>Konto</th>
+        <th>Naziv konta</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</div>
+
+<div class="notes" id="notes">
+  <button class="notes-toggle" id="notes-toggle">
+    <span>Važne napomene i legenda skupina</span>
+    <span class="arrow">▶</span>
+  </button>
+  <div class="notes-content">
+    <div class="legend-grid">
+      <div class="legend-row"><span class="swatch" style="background:var(--g1)"></span><span><b>Skupina 1</b> — Opći prihodi i primici</span></div>
+      <div class="legend-row"><span class="swatch" style="background:var(--g3)"></span><span><b>Skupina 3</b> — Vlastiti prihodi</span></div>
+      <div class="legend-row"><span class="swatch" style="background:var(--g4)"></span><span><b>Skupina 4</b> — Prihodi za posebne namjene</span></div>
+      <div class="legend-row"><span class="swatch" style="background:var(--g5)"></span><span><b>Skupina 5</b> — Pomoći (uklj. EU 50, 51, 52, 53, 56, 57, 58)</span></div>
+      <div class="legend-row"><span class="swatch" style="background:var(--g6)"></span><span><b>Skupina 6</b> — Donacije</span></div>
+      <div class="legend-row"><span class="swatch" style="background:var(--g7)"></span><span><b>Skupina 7</b> — Prihodi od prodaje nefinancijske imovine</span></div>
+      <div class="legend-row"><span class="swatch" style="background:var(--g8)"></span><span><b>Skupina 8</b> — Namjenski primici (zaduživanje)</span></div>
+      <div class="legend-row"><span class="swatch" style="background:var(--gx)"></span><span><b>XX</b> — Dodatna analitika EU projekata</span></div>
+    </div>
+    <ul>
+      <li>Od <b>01. siječnja 2026.</b> primjenjuju se nove oznake izvora financiranja u računovodstvenim evidencijama.</li>
+      <li><b>Pomoći iz državnog proračuna (izvor 50):</b> primatelj evidentira prihod na podizvoru koji odgovara izvoru davatelja (5011, 5012, 5031, 5041, 5042, 5043, 5052, 50810, 50815).</li>
+      <li><b>EU izvori (51, 56, 57, 58):</b> postoje dodatne analitičke razine — <b>00</b> (predujam), <b>11</b> (opći), <b>31</b> (vlastiti), <b>43</b> (posebne namjene), <b>81</b> (zaduživanje).</li>
+      <li><b>Konto 671</b> koristi se za izvore 11, 12 i može se koristiti i za 56, 57, 58, 815 — ovisno o nadležnom ministarstvu.</li>
+      <li>Kod EU projekata kad je <b>nositelj subjekt izvan općeg proračuna</b> (d.o.o., NO, obrt), prihod se knjiži na <b>663</b> ALI uz EU izvor (56x, 57x, 58x), a ne na izvor 61.</li>
+      <li>Pri prijenosu EU sredstava davatelj i primatelj imaju <b>jednaki izvor financiranja</b>.</li>
+      <li><b>Aktivnosti A679134</b> (programsko financiranje JVU 2025-2029), <b>A679135</b> (financiranje iz evidencijskih prihoda), <b>A679136</b> (NPOO C3.2.R1-I1) — novootvorene aktivnosti za sveučilišta i fakultete.</li>
+    </ul>
+  </div>
+</div>
+
+<footer>
+  Dashboard · Klikom na šifru ili konto vrijednost se kopira u međuspremnik · Ctrl+F za brzo pretraživanje
+</footer>
+
+</div>
+
+<div class="toast" id="toast">Kopirano</div>
+
+<script>
+(function() {
+  'use strict';
+
+  const DATA = [{"src": "11", "srcName": "Opći prihodi i primici", "purpose": "Plaće po zakonu, redovno poslovanje, financiranje rashoda iz nadležnog proračuna (npr. MZOM); programsko financiranje javnih visokih učilišta (A679134)", "konto": "6711", "kontoName": "Prihodi iz nadležnog proračuna za financiranje rashoda poslovanja"}, {"src": "11", "srcName": "Opći prihodi i primici", "purpose": "Financiranje nabave nefinancijske imovine iz nadležnog proračuna", "konto": "6712", "kontoName": "Prihodi iz nadležnog proračuna za financiranje rashoda za nabavu nefinancijske imovine"}, {"src": "11", "srcName": "Opći prihodi i primici", "purpose": "Financiranje izdataka za financijsku imovinu i otplatu zajmova", "konto": "6714", "kontoName": "Prihodi iz nadležnog proračuna za financiranje izdataka za financijsku imovinu i otplatu zajmova"}, {"src": "31", "srcName": "Vlastiti prihodi", "purpose": "Pružanje usluga na tržištu (elaborati, ekspertize, edukacije, seminari, konferencije, najam prostora i opreme, ugostiteljstvo)", "konto": "66141", "kontoName": "Prihodi od prodanih proizvoda"}, {"src": "31", "srcName": "Vlastiti prihodi", "purpose": "Prodaja roba (knjige i ostala roba)", "konto": "66142", "kontoName": "Prihodi od prodaje robe"}, {"src": "31", "srcName": "Vlastiti prihodi", "purpose": "Pružanje usluga na tržištu", "konto": "66151", "kontoName": "Prihodi od pruženih usluga"}, {"src": "31", "srcName": "Vlastiti prihodi", "purpose": "Ostali prihodi iz tržišnih aktivnosti", "konto": "68311", "kontoName": "Ostali prihodi"}, {"src": "31", "srcName": "Vlastiti prihodi", "purpose": "Kamate na vrijednosne papire", "konto": "64129", "kontoName": "Kamate za ostale vrijednosne papire"}, {"src": "31", "srcName": "Vlastiti prihodi", "purpose": "Kamate na oročena sredstva", "konto": "64131", "kontoName": "Kamate na oročena sredstva"}, {"src": "31", "srcName": "Vlastiti prihodi", "purpose": "Kamate na depozite po viđenju", "konto": "64132", "kontoName": "Kamate na depozite po viđenju"}, {"src": "31", "srcName": "Vlastiti prihodi", "purpose": "Zatezne kamate iz obveznih odnosa", "konto": "64143", "kontoName": "Zatezne kamate iz obveznih odnosa i drugo"}, {"src": "31", "srcName": "Vlastiti prihodi", "purpose": "Pozitivne tečajne razlike", "konto": "64151", "kontoName": "Prihodi od pozitivnih tečajnih razlika"}, {"src": "31", "srcName": "Vlastiti prihodi", "purpose": "Dividende na dionice", "konto": "64163", "kontoName": "Prihod od dividendi na dionice u kreditnim i ostalim financijskim institucijama izvan javnog sektora"}, {"src": "31", "srcName": "Vlastiti prihodi", "purpose": "Dividende na dionice u trgovačkim društvima", "konto": "64164", "kontoName": "Prihodi od dividendi na dionice u trgovačkim društvima izvan javnog sektora"}, {"src": "31", "srcName": "Vlastiti prihodi", "purpose": "Prodaja kratkotrajne nefinancijske imovine, sitnog inventara", "konto": "64251", "kontoName": "Prihodi od prodaje kratkotrajne nefinancijske imovine, sitnog inventara i autoguma"}, {"src": "31", "srcName": "Vlastiti prihodi", "purpose": "Ostali prihodi od nefinancijske imovine", "konto": "64299", "kontoName": "Ostali prihodi od nefinancijske imovine"}, {"src": "31", "srcName": "Vlastiti prihodi", "purpose": "Kamate na dane zajmove", "konto": "64341", "kontoName": "Prihodi od kamata na dane zajmove trgovačkim društvima u javnom sektoru"}, {"src": "31", "srcName": "Vlastiti prihodi", "purpose": "Programsko i ostalo financiranje JVU iz evidencijskih prihoda (A679135)", "konto": "661", "kontoName": "Prihodi od prodaje proizvoda i robe te pruženih usluga"}, {"src": "43", "srcName": "Ostali prihodi za posebne namjene", "purpose": "Školarine na akreditiranim studijskim programima, participacija studenata u troškovima studija (upisnine, potvrde, molbe, diplome); programsko i ostalo financiranje JVU (A679135)", "konto": "65264", "kontoName": "Prihodi od pruženih usluga (potvrde studentima i sl.)"}, {"src": "43", "srcName": "Ostali prihodi za posebne namjene", "purpose": "Prihodi po posebnim propisima", "konto": "652", "kontoName": "Prihodi po posebnim propisima"}, {"src": "5011", "srcName": "Pomoći iz DP kroz opće prihode i primitke", "purpose": "Sredstva drugih PK državnog proračuna (npr. Ministarstvo kulture i medija → Fakultet); HZZ; Hrvatska zaklada za znanost; Agencija za elektroničke medije", "konto": "63911", "kontoName": "Tekući prijenosi između proračunskih korisnika istog proračuna"}, {"src": "5011", "srcName": "Pomoći iz DP kroz opće prihode i primitke", "purpose": "Kapitalne pomoći od drugih PK DP (ne EU)", "konto": "63921", "kontoName": "Kapitalni prijenosi između proračunskih korisnika istog proračuna"}, {"src": "5012", "srcName": "Pomoći iz DP kroz nacionalno sufinanciranje EU projekata", "purpose": "Nacionalno sufinanciranje EU projekata iz državnog proračuna (15% komponenta)", "konto": "63931", "kontoName": "Tekući prijenosi između proračunskih korisnika istog proračuna temeljem prijenosa EU sredstava"}, {"src": "5012", "srcName": "Pomoći iz DP kroz nacionalno sufinanciranje EU projekata", "purpose": "Nacionalno sufinanciranje EU projekata - kapitalni rashodi", "konto": "63941", "kontoName": "Kapitalni prijenosi između proračunskih korisnika istog proračuna temeljem prijenosa EU sredstava"}, {"src": "5031", "srcName": "Pomoći iz DP kroz vlastite prihode", "purpose": "Prijenos sredstava od drugih PK DP iz njihovih vlastitih prihoda", "konto": "63911 / 63921", "kontoName": "Tekući/Kapitalni prijenosi između PK istog proračuna"}, {"src": "5041", "srcName": "Pomoći iz DP kroz prihode od igara na sreću", "purpose": "Sredstva financirana iz prihoda od igara na sreću", "konto": "63911 / 63921", "kontoName": "Tekući/Kapitalni prijenosi između PK istog proračuna"}, {"src": "5042", "srcName": "Pomoći iz DP kroz prihode od spomeničke rente", "purpose": "Sredstva financirana iz spomeničke rente", "konto": "63911 / 63921", "kontoName": "Tekući/Kapitalni prijenosi između PK istog proračuna"}, {"src": "5043", "srcName": "Pomoći iz DP kroz ostale prihode za posebne namjene", "purpose": "Sredstva financirana iz ostalih prihoda za posebne namjene", "konto": "63911 / 63921", "kontoName": "Tekući/Kapitalni prijenosi između PK istog proračuna"}, {"src": "5052", "srcName": "Pomoći iz DP kroz ostale pomoći", "purpose": "Prijenos sredstava iz drugih izvora unutar DP", "konto": "63911 / 63921", "kontoName": "Tekući/Kapitalni prijenosi između PK istog proračuna"}, {"src": "50810", "srcName": "Pomoći iz DP kroz namjenske primitke od zaduživanja", "purpose": "Sredstva iz zaduživanja (osim NPOO)", "konto": "63911 / 63921", "kontoName": "Tekući/Kapitalni prijenosi između PK istog proračuna"}, {"src": "50815", "srcName": "Pomoći iz DP kroz namjenske primitke od zaduživanja - NPOO", "purpose": "Sredstva iz NPOO zajma", "konto": "63931 / 63941", "kontoName": "Tekući/Kapitalni prijenosi između PK istog proračuna temeljem EU sredstava"}, {"src": "510", "srcName": "Programi Unije (oznaka fonda)", "purpose": "Erasmus+, Europske snage solidarnosti, CEF, Obzor Europa, Digitalna Europa, Kreativna Europa, LIFE - kad EK izravno doznačava (npr. Obzor)", "konto": "63231", "kontoName": "Tekuće pomoći od institucija i tijela EU"}, {"src": "510", "srcName": "Programi Unije", "purpose": "Kapitalne pomoći - kad EK izravno doznačava", "konto": "63241", "kontoName": "Kapitalne pomoći od institucija i tijela EU"}, {"src": "510", "srcName": "Programi Unije", "purpose": "Erasmus+ kad sredstva doznačava AMPEU (preko DP) - tekuće", "konto": "63931", "kontoName": "Tekući prijenosi između PK istog proračuna temeljem EU sredstava"}, {"src": "510", "srcName": "Programi Unije", "purpose": "Erasmus+ kad sredstva doznačava AMPEU - kapitalno", "konto": "63941", "kontoName": "Kapitalni prijenosi između PK istog proračuna temeljem EU sredstava"}, {"src": "51000", "srcName": "Programi Unije - raspoloživi predujam", "purpose": "Troškovi financirani iz primljenog EU predujma", "konto": "632 / 639", "kontoName": "Pomoći od institucija EU / prijenosi između PK temeljem EU"}, {"src": "51011", "srcName": "Programi Unije - predfinanciranje iz općih prihoda", "purpose": "Predfinanciranje iz općih prihoda i primitaka", "konto": "632 / 639", "kontoName": "Pomoći od institucija EU / prijenosi između PK temeljem EU"}, {"src": "51031", "srcName": "Programi Unije - predfinanciranje iz vlastitih prihoda", "purpose": "Predfinanciranje iz vlastitih prihoda", "konto": "632 / 639", "kontoName": "Pomoći od institucija EU / prijenosi između PK temeljem EU"}, {"src": "51043", "srcName": "Programi Unije - predfinanciranje iz posebnih namjena", "purpose": "Predfinanciranje iz ostalih prihoda za posebne namjene", "konto": "632 / 639", "kontoName": "Pomoći od institucija EU / prijenosi između PK temeljem EU"}, {"src": "51081", "srcName": "Programi Unije - predfinanciranje iz zaduživanja", "purpose": "Predfinanciranje iz namjenskih primitaka od zaduživanja", "konto": "632 / 639", "kontoName": "Pomoći od institucija EU / prijenosi između PK temeljem EU"}, {"src": "52", "srcName": "Ostale pomoći", "purpose": "Pomoći od JLP(R)S (županija, grad, općina) i njihovih PK - sufinanciranje rada Fakulteta (npr. deficitarni programi)", "konto": "63613", "kontoName": "Tekuće pomoći proračunskim korisnicima iz proračuna koji im nije nadležan"}, {"src": "52", "srcName": "Ostale pomoći", "purpose": "Kapitalne pomoći od JLP(R)S i njihovih PK", "konto": "63623", "kontoName": "Kapitalne pomoći proračunskim korisnicima iz proračuna koji im nije nadležan"}, {"src": "52", "srcName": "Ostale pomoći", "purpose": "Tekuće pomoći od HZMO, HZZ, HZZO", "konto": "63414", "kontoName": "Tekuće pomoći od HZMO-a, HZZ-a i HZZO-a"}, {"src": "52", "srcName": "Ostale pomoći", "purpose": "Tekuće pomoći od ostalih izvanproračunskih korisnika DP", "konto": "63415", "kontoName": "Tekuće pomoći od ostalih izvanproračunskih korisnika državnog proračuna"}, {"src": "52", "srcName": "Ostale pomoći", "purpose": "Tekuće pomoći od izvanproračunskih korisnika JLP(R)S", "konto": "63416", "kontoName": "Tekuće pomoći od izvanproračunskih korisnika JLP(R)S"}, {"src": "52", "srcName": "Ostale pomoći", "purpose": "Kapitalne pomoći od HZMO, HZZ, HZZO", "konto": "63424", "kontoName": "Kapitalne pomoći od HZMO-a, HZZ-a i HZZO-a"}, {"src": "52", "srcName": "Ostale pomoći", "purpose": "Kapitalne pomoći od ostalih IPK DP", "konto": "63425", "kontoName": "Kapitalne pomoći od ostalih izvanproračunskih korisnika državnog proračuna"}, {"src": "52", "srcName": "Ostale pomoći", "purpose": "Kapitalne pomoći od IPK JLP(R)S", "konto": "63426", "kontoName": "Kapitalne pomoći od izvanproračunskih korisnika JLP(R)S"}, {"src": "531", "srcName": "Švicarsko-hrvatski program suradnje", "purpose": "Pomoći iz Švicarsko-hrvatskog programa", "konto": "631 / 632", "kontoName": "Pomoći od inozemnih vlada / od međunarodnih organizacija"}, {"src": "532", "srcName": "Financijski mehanizam EGP-a i Norveški financijski mehanizam", "purpose": "Pomoći iz Norveškog/EGP financijskog mehanizma", "konto": "631 / 632", "kontoName": "Pomoći od inozemnih vlada / od međunarodnih organizacija"}, {"src": "533", "srcName": "Ostale darovnice", "purpose": "Ostale namjenske darovnice iz inozemstva (USAID, IBRD, MMF, UNESCO, UNICEF i sl.)", "konto": "63111", "kontoName": "Tekuće pomoći od inozemnih vlada u EU"}, {"src": "533", "srcName": "Ostale darovnice", "purpose": "Tekuće pomoći od inozemnih vlada izvan EU", "konto": "63112", "kontoName": "Tekuće pomoći od inozemnih vlada izvan EU"}, {"src": "533", "srcName": "Ostale darovnice", "purpose": "Kapitalne pomoći od inozemnih vlada u EU", "konto": "63121", "kontoName": "Kapitalne pomoći od inozemnih vlada u EU"}, {"src": "533", "srcName": "Ostale darovnice", "purpose": "Kapitalne pomoći od inozemnih vlada izvan EU", "konto": "63122", "kontoName": "Kapitalne pomoći od inozemnih vlada izvan EU"}, {"src": "533", "srcName": "Ostale darovnice", "purpose": "Tekuće pomoći od međunarodnih organizacija (UNESCO, UNICEF...)", "konto": "63211", "kontoName": "Tekuće pomoći od međunarodnih organizacija"}, {"src": "533", "srcName": "Ostale darovnice", "purpose": "Kapitalne pomoći od međunarodnih organizacija", "konto": "63221", "kontoName": "Kapitalne pomoći od međunarodnih organizacija"}, {"src": "561", "srcName": "Europski socijalni fond plus (ESF+)", "purpose": "Program Učinkoviti ljudski potencijali 2021.-2027.; projekti razvoja ljudskih resursa", "konto": "63931 / 63941", "kontoName": "Tekući/Kapitalni prijenosi između PK istog proračuna temeljem prijenosa EU sredstava"}, {"src": "561", "srcName": "ESF+ - od JLP(R)S/IPK", "purpose": "Pomoći ESF+ posredno preko JLP(R)S, drugog proračuna ili IPK", "konto": "63812-14 / 63822-24", "kontoName": "Tekuće/Kapitalne pomoći temeljem prijenosa EU sredstava"}, {"src": "562", "srcName": "Kohezijski fond", "purpose": "Program Konkurentnost i kohezija 2021.-2027.; infrastrukturni projekti", "konto": "63931 / 63941", "kontoName": "Tekući/Kapitalni prijenosi između PK istog proračuna temeljem EU sredstava"}, {"src": "563", "srcName": "Europski fond za regionalni razvoj (EFRR)", "purpose": "Program Konkurentnost i kohezija; Integrirani teritorijalni program; Europska teritorijalna suradnja; programi prekogranične suradnje", "konto": "63931 / 63941", "kontoName": "Tekući/Kapitalni prijenosi između PK istog proračuna temeljem EU sredstava"}, {"src": "564", "srcName": "Fond za pomorstvo, ribarstvo i akvakulturu", "purpose": "Program za ribarstvo i akvakulturu RH 2021.-2027.", "konto": "63931 / 63941", "kontoName": "Tekući/Kapitalni prijenosi između PK istog proračuna temeljem EU sredstava"}, {"src": "565", "srcName": "Europski poljoprivredni fond za ruralni razvoj (EPFRR)", "purpose": "Program ruralnog razvoja 2023.-2027.", "konto": "63931 / 63941", "kontoName": "Tekući/Kapitalni prijenosi između PK istog proračuna temeljem EU sredstava"}, {"src": "566", "srcName": "Modernizacijski fond", "purpose": "Projekti modernizacije energetskog sektora", "konto": "63931 / 63941", "kontoName": "Tekući/Kapitalni prijenosi između PK istog proračuna temeljem EU sredstava"}, {"src": "567", "srcName": "Socijalni fond za klimatsku politiku", "purpose": "Projekti klimatske tranzicije", "konto": "63931 / 63941", "kontoName": "Tekući/Kapitalni prijenosi između PK istog proračuna temeljem EU sredstava"}, {"src": "575", "srcName": "Fond za azil, migracije i integraciju", "purpose": "Programi MUP-a iz područja azila i migracija", "konto": "63931 / 63941", "kontoName": "Tekući/Kapitalni prijenosi između PK istog proračuna temeljem EU sredstava"}, {"src": "577", "srcName": "Fond za pravednu tranziciju", "purpose": "Integrirani teritorijalni program 2021.-2027.; projekti pravedne tranzicije", "konto": "63931 / 63941", "kontoName": "Tekući/Kapitalni prijenosi između PK istog proračuna temeljem EU sredstava"}, {"src": "578", "srcName": "Fond za unutarnju sigurnost", "purpose": "Programi MUP-a - unutarnja sigurnost", "konto": "63931 / 63941", "kontoName": "Tekući/Kapitalni prijenosi između PK istog proračuna temeljem EU sredstava"}, {"src": "579", "srcName": "Fond za integrirano upravljanje granicama", "purpose": "Programi MUP-a - upravljanje granicama", "konto": "63931 / 63941", "kontoName": "Tekući/Kapitalni prijenosi između PK istog proračuna temeljem EU sredstava"}, {"src": "581", "srcName": "Mehanizam za oporavak i otpornost - bespovratna sredstva (NPOO)", "purpose": "Reforme i ulaganja iz NPOO; razvoj sustava programskih sporazuma za sveučilišta i znanstvene institute (A679136); kapitalni projekti iz NPOO", "konto": "63931", "kontoName": "Tekući prijenosi između PK istog proračuna temeljem prijenosa EU sredstava"}, {"src": "581", "srcName": "NPOO - bespovratna sredstva", "purpose": "NPOO kapitalni rashodi", "konto": "63941", "kontoName": "Kapitalni prijenosi između PK istog proračuna temeljem prijenosa EU sredstava"}, {"src": "581", "srcName": "NPOO - bespovratna sredstva", "purpose": "NPOO sredstva iz nadležnog proračuna (npr. MZOM za sveučilišta)", "konto": "67111 / 67121", "kontoName": "Prihodi iz nadležnog proračuna"}, {"src": "XX00", "srcName": "Dodatna analitika - raspoloživi predujam", "purpose": "Troškovi financirani iz raspoloživog EU predujma (XX = 510, 561, 562, 563, 581...)", "konto": "631-639 (po nositelju)", "kontoName": "Prema nositelju i kontu"}, {"src": "XX11", "srcName": "Dodatna analitika - predfinanciranje iz općih prihoda", "purpose": "Predfinanciranje EU projekta iz općih prihoda i primitaka", "konto": "631-639 (po nositelju)", "kontoName": "Prema nositelju i kontu"}, {"src": "XX31", "srcName": "Dodatna analitika - predfinanciranje iz vlastitih prihoda", "purpose": "Predfinanciranje EU projekta iz vlastitih prihoda", "konto": "631-639 (po nositelju)", "kontoName": "Prema nositelju i kontu"}, {"src": "XX43", "srcName": "Dodatna analitika - predfinanciranje iz prihoda za posebne namjene", "purpose": "Predfinanciranje EU projekta iz prihoda za posebne namjene", "konto": "631-639 (po nositelju)", "kontoName": "Prema nositelju i kontu"}, {"src": "XX81", "srcName": "Dodatna analitika - predfinanciranje iz zaduživanja", "purpose": "Predfinanciranje EU projekta iz namjenskih primitaka od zaduživanja", "konto": "631-639 (po nositelju)", "kontoName": "Prema nositelju i kontu"}, {"src": "61", "srcName": "Donacije", "purpose": "Alumni donacije, donacije privatnog sektora, međunarodne fundacije, donacije iz inozemstva (NIJE vezano za EU projekte)", "konto": "66311", "kontoName": "Tekuće donacije od fizičkih osoba"}, {"src": "61", "srcName": "Donacije", "purpose": "Donacije od neprofitnih organizacija", "konto": "66312", "kontoName": "Tekuće donacije od neprofitnih organizacija"}, {"src": "61", "srcName": "Donacije", "purpose": "Donacije od trgovačkih društava", "konto": "66313", "kontoName": "Tekuće donacije od trgovačkih društava"}, {"src": "61", "srcName": "Donacije", "purpose": "Donacije od ostalih subjekata izvan općeg proračuna", "konto": "66314", "kontoName": "Tekuće donacije od ostalih subjekata izvan općeg proračuna"}, {"src": "61", "srcName": "Donacije", "purpose": "Kapitalne donacije od fizičkih osoba", "konto": "66321", "kontoName": "Kapitalne donacije od fizičkih osoba"}, {"src": "61", "srcName": "Donacije", "purpose": "Kapitalne donacije od neprofitnih organizacija", "konto": "66322", "kontoName": "Kapitalne donacije od neprofitnih organizacija"}, {"src": "61", "srcName": "Donacije", "purpose": "Kapitalne donacije od trgovačkih društava", "konto": "66323", "kontoName": "Kapitalne donacije od trgovačkih društava"}, {"src": "61", "srcName": "Donacije", "purpose": "Kapitalne donacije od ostalih subjekata izvan općeg proračuna", "konto": "66324", "kontoName": "Kapitalne donacije od ostalih subjekata izvan općeg proračuna"}, {"src": "56x/57x/58x", "srcName": "EU izvor (kad je partner d.o.o./NO/obrt)", "purpose": "Fakultet partner na EU projektu, nositelj je trgovačko društvo/NO/obrt - konto 663 ali EU izvor", "konto": "663", "kontoName": "Donacije od pravnih i fizičkih osoba izvan općeg proračuna"}, {"src": "71", "srcName": "Prihodi od prodaje ili zamjene nefinancijske imovine i naknade s naslova osiguranja", "purpose": "Prodaja/zamjena nefinancijske dugotrajne imovine; naknade štete s osnove osiguranja - mogu se koristiti samo za kapitalne rashode, dionice, otplate glavnice", "konto": "65267", "kontoName": "Prihodi s naslova osiguranja, refundacije štete i totalne štete"}, {"src": "71", "srcName": "Prodaja nefinancijske imovine", "purpose": "Prihodi od prodaje nefinancijske imovine", "konto": "72", "kontoName": "Prihodi od prodaje proizvedene dugotrajne imovine (skupina 7)"}, {"src": "810", "srcName": "Namjenski primici od zaduživanja - ostali", "purpose": "Krediti i zajmovi od domaćih i inozemnih kreditnih institucija (osim NPOO)", "konto": "84222", "kontoName": "Primljeni krediti od kreditnih institucija u javnom sektoru - dugoročni"}, {"src": "810", "srcName": "Namjenski primici od zaduživanja - ostali", "purpose": "Krediti od kreditnih institucija izvan javnog sektora", "konto": "84432", "kontoName": "Primljeni krediti od tuzemnih kreditnih institucija izvan javnog sektora - dugoročni"}, {"src": "815", "srcName": "Mehanizam za oporavak i otpornost (NPOO - zajam)", "purpose": "Sredstva NPOO zajma za reforme i ulaganja", "konto": "84222", "kontoName": "Primljeni krediti od kreditnih institucija u javnom sektoru - dugoročni"}, {"src": "815", "srcName": "NPOO - zajam", "purpose": "NPOO zajam od kreditnih institucija izvan javnog sektora", "konto": "84432", "kontoName": "Primljeni krediti od tuzemnih kreditnih institucija izvan javnog sektora - dugoročni"}, {"src": "84", "srcName": "Namjenski primici od povrata danih zajmova", "purpose": "Povrati danih zajmova", "konto": "84", "kontoName": "Primici od zaduživanja"}];
+
+  const groupNames = {
+    '1': 'Opći prihodi',
+    '3': 'Vlastiti prihodi',
+    '4': 'Posebne namjene',
+    '5': 'Pomoći',
+    '6': 'Donacije',
+    '7': 'Prodaja imovine',
+    '8': 'Zaduživanje',
+    'X': 'EU analitika'
+  };
+
+  // Determine group for each row
+  DATA.forEach(r => {
+    const s = String(r.src);
+    if (s.startsWith('X') || s.includes('x/')) r._g = 'X';
+    else r._g = s.charAt(0);
+  });
+
+  // State
+  let activeGroup = 'all';
+  let searchTerm = '';
+
+  // DOM refs
+  const tbody = document.getElementById('tbody');
+  const searchInput = document.getElementById('search');
+  const clearBtn = document.getElementById('clear-btn');
+  const chipsEl = document.getElementById('chips');
+  const countShown = document.getElementById('count-shown');
+  const countTotal = document.getElementById('count-total');
+  const toast = document.getElementById('toast');
+  const notesEl = document.getElementById('notes');
+  const notesToggle = document.getElementById('notes-toggle');
+
+  // Stats
+  const totalRows = DATA.length;
+  const uniqueSources = new Set(DATA.map(r => r.src)).size;
+  const uniqueKontos = new Set(DATA.map(r => r.konto)).size;
+  document.getElementById('stat-rows').textContent = totalRows;
+  document.getElementById('stat-sources').textContent = uniqueSources;
+  document.getElementById('stat-kontos').textContent = uniqueKontos;
+  countTotal.textContent = totalRows;
+
+  // Build chips
+  const groupCounts = {};
+  DATA.forEach(r => { groupCounts[r._g] = (groupCounts[r._g] || 0) + 1; });
+  const orderedGroups = ['1', '3', '4', '5', '6', '7', '8', 'X'].filter(g => groupCounts[g]);
+
+  let chipsHtml = '<button class="chip active" data-g="all">Sve <span class="count">' + totalRows + '</span></button>';
+  orderedGroups.forEach(g => {
+    chipsHtml += '<button class="chip" data-g="' + g + '"><span class="dot"></span>' +
+                 (g === 'X' ? 'XX ' : g + ' · ') + groupNames[g] +
+                 ' <span class="count">' + groupCounts[g] + '</span></button>';
+  });
+  chipsEl.innerHTML = chipsHtml;
+
+  chipsEl.addEventListener('click', e => {
+    const btn = e.target.closest('.chip');
+    if (!btn) return;
+    chipsEl.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    activeGroup = btn.getAttribute('data-g');
+    render();
+  });
+
+  // Escape HTML
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // Highlight search term
+  function highlight(text, term) {
+    const safe = esc(text);
+    if (!term) return safe;
+    const escTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return safe.replace(new RegExp('(' + escTerm + ')', 'gi'), '<mark>$1</mark>');
+  }
+
+  function render() {
+    const term = searchTerm.trim().toLowerCase();
+    const filtered = DATA.filter(r => {
+      if (activeGroup !== 'all' && r._g !== activeGroup) return false;
+      if (!term) return true;
+      return (r.src + ' ' + r.srcName + ' ' + r.purpose + ' ' + r.konto + ' ' + r.kontoName).toLowerCase().includes(term);
+    });
+
+    countShown.textContent = filtered.length;
+
+    if (!filtered.length) {
+      tbody.innerHTML = '<tr><td colspan="5" class="empty">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>' +
+        'Nema rezultata za zadane filtere.</td></tr>';
+      return;
+    }
+
+    let html = '';
+    filtered.forEach(r => {
+      html += '<tr data-g="' + r._g + '">' +
+        '<td class="col-src" data-label="Šifra"><span class="code" data-copy="' + esc(r.src) + '">' + highlight(r.src, term) + '</span></td>' +
+        '<td class="col-srcname" data-label="Naziv izvora"><div class="src-name">' + highlight(r.srcName, term) + '</div></td>' +
+        '<td class="col-purpose" data-label="Namjena"><div class="purpose">' + highlight(r.purpose, term) + '</div></td>' +
+        '<td class="col-konto" data-label="Konto"><span class="code" data-copy="' + esc(r.konto) + '">' + highlight(r.konto, term) + '</span></td>' +
+        '<td class="col-kontoname" data-label="Naziv konta"><div class="konto-name">' + highlight(r.kontoName, term) + '</div></td>' +
+        '</tr>';
+    });
+    tbody.innerHTML = html;
+  }
+
+  // Search input
+  let searchTimer;
+  searchInput.addEventListener('input', e => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      searchTerm = e.target.value;
+      render();
+    }, 80);
+  });
+
+  clearBtn.addEventListener('click', () => {
+    searchInput.value = '';
+    searchTerm = '';
+    activeGroup = 'all';
+    chipsEl.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    chipsEl.querySelector('.chip[data-g="all"]').classList.add('active');
+    render();
+    searchInput.focus();
+  });
+
+  // Copy to clipboard on click
+  tbody.addEventListener('click', e => {
+    const code = e.target.closest('.code');
+    if (!code) return;
+    const value = code.getAttribute('data-copy');
+    copyToClipboard(value, code);
+  });
+
+  function copyToClipboard(text, el) {
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(() => showCopied(text, el)).catch(() => fallbackCopy(text, el));
+    } else {
+      fallbackCopy(text, el);
+    }
+  }
+
+  function fallbackCopy(text, el) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); showCopied(text, el); } catch(e) {}
+    document.body.removeChild(ta);
+  }
+
+  let toastTimer;
+  function showCopied(text, el) {
+    if (el) {
+      el.classList.add('copied');
+      setTimeout(() => el.classList.remove('copied'), 800);
+    }
+    toast.textContent = 'Kopirano: ' + text;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 1500);
+  }
+
+  // Notes toggle
+  notesToggle.addEventListener('click', () => {
+    notesEl.classList.toggle('open');
+  });
+
+  // Keyboard: focus search on /
+  document.addEventListener('keydown', e => {
+    if (e.key === '/' && document.activeElement !== searchInput) {
+      e.preventDefault();
+      searchInput.focus();
+    } else if (e.key === 'Escape' && document.activeElement === searchInput) {
+      searchInput.value = '';
+      searchTerm = '';
+      render();
+    }
+  });
+
+  // Initial render
+  render();
+})();
+</script>
+</body>
+</html>
